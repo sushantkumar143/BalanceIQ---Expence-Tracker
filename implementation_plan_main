@@ -1,0 +1,564 @@
+# BalanceIQ — Shared Expense Management SaaS
+
+> Transform messy expense spreadsheets into trustworthy, explainable balances.
+
+## Overview
+
+BalanceIQ is a production-grade expense management platform with a key differentiator: a **CSV Import & Anomaly Resolution Engine** that handles messy real-world data and explains every decision. This plan covers a full-stack build with FastAPI + PostgreSQL backend and React + TypeScript frontend.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **PostgreSQL Requirement**: The plan assumes PostgreSQL is already installed and running locally. Please confirm your PostgreSQL connection details (host, port, username, password, database name) or if you'd prefer SQLite for initial development.
+
+> [!IMPORTANT]
+> **Scope Confirmation**: This is a very large application. The plan prioritizes the 6 core systems in order. Some features like "Watch Demo" video, downloadable PDF reports, and real-time notifications will be stubbed with UI placeholders initially. Confirm if this phased approach is acceptable.
+
+> [!WARNING]
+> **TailwindCSS Version**: The plan uses TailwindCSS v4 (latest) with ShadCN UI. Confirm if you prefer v3 instead.
+
+---
+
+## Open Questions
+
+1. **Database**: Should we use PostgreSQL from day one, or start with SQLite for faster iteration and migrate later?
+2. **Authentication**: Should JWT tokens be stored in `httpOnly` cookies (more secure) or `localStorage` (simpler)?
+3. **Currency Conversion**: Should multi-currency support include live exchange rates via an API, or use user-defined static rates?
+4. **Demo Data**: Should we seed the database with realistic demo data for showcasing?
+5. **Deployment**: Any target deployment platform (Vercel + Railway, Docker Compose, etc.)?
+
+---
+
+## Architecture
+
+```
+BalanceIQ/
+├── backend/                    # FastAPI application
+│   ├── alembic/                # Database migrations
+│   ├── app/
+│   │   ├── api/                # Route handlers
+│   │   │   ├── v1/
+│   │   │   │   ├── auth.py
+│   │   │   │   ├── groups.py
+│   │   │   │   ├── expenses.py
+│   │   │   │   ├── settlements.py
+│   │   │   │   ├── imports.py
+│   │   │   │   ├── balances.py
+│   │   │   │   └── reports.py
+│   │   │   └── deps.py         # Dependency injection
+│   │   ├── core/               # Configuration, security
+│   │   │   ├── config.py
+│   │   │   ├── security.py
+│   │   │   └── exceptions.py
+│   │   ├── models/             # SQLAlchemy models
+│   │   │   ├── user.py
+│   │   │   ├── group.py
+│   │   │   ├── expense.py
+│   │   │   ├── settlement.py
+│   │   │   ├── import_record.py
+│   │   │   └── audit.py
+│   │   ├── schemas/            # Pydantic schemas
+│   │   ├── services/           # Business logic
+│   │   │   ├── csv_engine.py         # CSV parsing & normalization
+│   │   │   ├── anomaly_engine.py     # Anomaly detection
+│   │   │   ├── balance_engine.py     # Ledger-based balance calc
+│   │   │   ├── settlement_engine.py  # Settlement optimization
+│   │   │   ├── membership_engine.py  # Timeline logic
+│   │   │   └── report_engine.py      # Report generation
+│   │   ├── db/                 # Database session & base
+│   │   └── main.py             # FastAPI app entry
+│   ├── tests/
+│   ├── alembic.ini
+│   └── requirements.txt
+│
+├── frontend/                   # React + Vite application
+│   ├── src/
+│   │   ├── components/         # Reusable UI components
+│   │   │   ├── ui/             # ShadCN primitives
+│   │   │   ├── layout/         # Shell, Sidebar, Header
+│   │   │   ├── dashboard/      # Dashboard widgets
+│   │   │   ├── import/         # Import wizard components
+│   │   │   ├── anomaly/        # Anomaly cards & review
+│   │   │   ├── balance/        # Balance display & explanation
+│   │   │   ├── settlement/     # Settlement flow cards
+│   │   │   └── shared/         # Common components
+│   │   ├── pages/              # Route-level pages
+│   │   ├── hooks/              # Custom React hooks
+│   │   ├── services/           # API client layer
+│   │   ├── stores/             # State management
+│   │   ├── lib/                # Utilities
+│   │   ├── types/              # TypeScript types
+│   │   └── styles/             # Global styles
+│   ├── public/
+│   └── package.json
+│
+└── README.md
+```
+
+---
+
+## Database Schema
+
+### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    Users ||--o{ GroupMembers : "belongs to"
+    Groups ||--o{ GroupMembers : "has"
+    Groups ||--o{ Expenses : "contains"
+    Groups ||--o{ Settlements : "contains"
+    Groups ||--o{ Imports : "receives"
+    Users ||--o{ Expenses : "pays"
+    Expenses ||--o{ ExpenseParticipants : "split among"
+    Users ||--o{ ExpenseParticipants : "participates in"
+    Imports ||--o{ ImportAnomalies : "generates"
+    Imports ||--o{ ImportReports : "produces"
+    Users ||--o{ AuditLogs : "performed by"
+
+    Users {
+        uuid id PK
+        string email UK
+        string name
+        string password_hash
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    Groups {
+        uuid id PK
+        string name
+        string description
+        string default_currency
+        uuid created_by FK
+        timestamp created_at
+    }
+
+    GroupMembers {
+        uuid id PK
+        uuid group_id FK
+        uuid user_id FK
+        date join_date
+        date leave_date
+        string role
+        string display_name
+        timestamp created_at
+    }
+
+    Expenses {
+        uuid id PK
+        uuid group_id FK
+        uuid payer_id FK
+        uuid import_id FK
+        string description
+        decimal amount
+        string currency
+        date expense_date
+        string split_type
+        string category
+        string status
+        int csv_row_number
+        timestamp created_at
+    }
+
+    ExpenseParticipants {
+        uuid id PK
+        uuid expense_id FK
+        uuid user_id FK
+        decimal share_amount
+        decimal share_percentage
+        int share_units
+    }
+
+    Settlements {
+        uuid id PK
+        uuid group_id FK
+        uuid payer_id FK
+        uuid payee_id FK
+        uuid import_id FK
+        decimal amount
+        string currency
+        date settlement_date
+        string status
+        string notes
+        int csv_row_number
+        timestamp created_at
+    }
+
+    Imports {
+        uuid id PK
+        uuid group_id FK
+        uuid uploaded_by FK
+        string filename
+        string status
+        int total_rows
+        int imported_rows
+        int warning_count
+        int error_count
+        json column_mapping
+        json raw_preview
+        timestamp created_at
+        timestamp completed_at
+    }
+
+    ImportAnomalies {
+        uuid id PK
+        uuid import_id FK
+        int row_number
+        string severity
+        string anomaly_type
+        string explanation
+        json suggested_action
+        string resolution
+        json resolution_data
+        uuid resolved_by FK
+        timestamp resolved_at
+        timestamp created_at
+    }
+
+    ImportReports {
+        uuid id PK
+        uuid import_id FK
+        json report_data
+        timestamp created_at
+    }
+
+    Currencies {
+        string code PK
+        string name
+        string symbol
+        decimal exchange_rate_to_base
+    }
+
+    AuditLogs {
+        uuid id PK
+        uuid user_id FK
+        uuid group_id FK
+        string action
+        string entity_type
+        uuid entity_id
+        json old_data
+        json new_data
+        timestamp created_at
+    }
+```
+
+### Key Schema Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| UUIDs for all PKs | Prevents ID enumeration, safe for distributed systems |
+| `join_date` / `leave_date` on `GroupMembers` | Core membership timeline — expenses only apply within active window |
+| `csv_row_number` on Expenses/Settlements | Traceability back to original CSV row |
+| `import_id` FK on Expenses/Settlements | Links every imported record to its import batch |
+| `resolution` + `resolution_data` on Anomalies | Stores user decision with full audit trail |
+| Ledger-based balances (no stored balance column) | Balances are always derived, never stale |
+
+---
+
+## Proposed Changes
+
+### Phase 1 — Foundation & Backend Core
+
+#### Backend Setup
+
+##### [NEW] backend/requirements.txt
+Core dependencies: `fastapi`, `uvicorn`, `sqlalchemy`, `alembic`, `psycopg2-binary`, `pydantic`, `python-jose`, `passlib`, `python-multipart`, `pandas`
+
+##### [NEW] backend/app/main.py
+FastAPI application with CORS middleware, router registration, startup/shutdown events.
+
+##### [NEW] backend/app/core/config.py
+Settings using Pydantic `BaseSettings` — database URL, JWT secret, token expiry, CORS origins.
+
+##### [NEW] backend/app/core/security.py
+JWT token creation/verification, password hashing with bcrypt, OAuth2 bearer scheme.
+
+##### [NEW] backend/app/core/exceptions.py
+Custom exception classes and FastAPI exception handlers for consistent error responses.
+
+##### [NEW] backend/app/db/base.py
+SQLAlchemy declarative base, session factory, `get_db` dependency.
+
+##### [NEW] backend/app/models/*.py
+All SQLAlchemy models as described in the schema section above (8 model files).
+
+##### [NEW] backend/alembic/
+Alembic configuration and initial migration for all tables.
+
+---
+
+#### Backend API Routes
+
+##### [NEW] backend/app/api/v1/auth.py
+- `POST /api/v1/auth/register` — Create account
+- `POST /api/v1/auth/login` — Login, return JWT
+- `POST /api/v1/auth/forgot-password` — Password reset flow
+- `GET /api/v1/auth/me` — Current user profile
+
+##### [NEW] backend/app/api/v1/groups.py
+- `POST /api/v1/groups` — Create group
+- `GET /api/v1/groups` — List user's groups
+- `GET /api/v1/groups/{id}` — Group detail
+- `POST /api/v1/groups/{id}/members` — Add member with join_date
+- `PATCH /api/v1/groups/{id}/members/{member_id}` — Update member (set leave_date)
+- `DELETE /api/v1/groups/{id}/members/{member_id}` — Remove member
+
+##### [NEW] backend/app/api/v1/expenses.py
+- `POST /api/v1/groups/{id}/expenses` — Create expense (manual)
+- `GET /api/v1/groups/{id}/expenses` — List with search, filter, sort, pagination
+- `GET /api/v1/groups/{id}/expenses/{expense_id}` — Detail view
+- `PATCH /api/v1/groups/{id}/expenses/{expense_id}` — Update
+- `DELETE /api/v1/groups/{id}/expenses/{expense_id}` — Delete
+
+##### [NEW] backend/app/api/v1/settlements.py
+- `POST /api/v1/groups/{id}/settlements` — Record settlement
+- `GET /api/v1/groups/{id}/settlements` — List settlements
+
+##### [NEW] backend/app/api/v1/imports.py
+- `POST /api/v1/groups/{id}/imports/upload` — Upload CSV
+- `GET /api/v1/groups/{id}/imports/{import_id}/preview` — Preview parsed data
+- `GET /api/v1/groups/{id}/imports/{import_id}/membership` — Membership suggestions
+- `POST /api/v1/groups/{id}/imports/{import_id}/membership` — Confirm membership
+- `GET /api/v1/groups/{id}/imports/{import_id}/anomalies` — List anomalies
+- `PATCH /api/v1/groups/{id}/imports/{import_id}/anomalies/{anomaly_id}` — Resolve anomaly
+- `POST /api/v1/groups/{id}/imports/{import_id}/execute` — Execute import
+- `GET /api/v1/groups/{id}/imports/{import_id}/report` — Import report
+
+##### [NEW] backend/app/api/v1/balances.py
+- `GET /api/v1/groups/{id}/balances` — Net balances for all members
+- `GET /api/v1/groups/{id}/balances/{user_id}/explain` — Balance breakdown
+- `GET /api/v1/groups/{id}/settlements/recommendations` — Optimized settlements
+
+##### [NEW] backend/app/api/v1/reports.py
+- `GET /api/v1/groups/{id}/reports/monthly-trends` — Monthly expense chart data
+- `GET /api/v1/groups/{id}/reports/categories` — Category breakdown
+- `GET /api/v1/groups/{id}/reports/contributions` — Member contributions
+- `GET /api/v1/groups/{id}/reports/currency-breakdown` — Currency analysis
+
+---
+
+### Phase 2 — Core Business Logic (Services)
+
+##### [NEW] backend/app/services/csv_engine.py
+
+The CSV Engine handles:
+1. **Parsing**: Read CSV with flexible column detection (fuzzy header matching)
+2. **Normalization**: Clean amounts (`$1,500.00` → `1500.00`), standardize dates, normalize names
+3. **Classification**: Detect if a row is an expense or settlement (keyword detection: "paid", "settled", "reimbursed")
+4. **User Extraction**: Build unique user list from payer/participant columns
+5. **Column Mapping**: Auto-detect or user-configured column mapping
+
+##### [NEW] backend/app/services/anomaly_engine.py
+
+Anomaly detection pipeline (runs in sequence):
+
+| Detector | Logic | Severity |
+|----------|-------|----------|
+| `DuplicateDetector` | Same payer + amount + date + fuzzy description match (>85% similarity) | Warning |
+| `DateAnomalyDetector` | Unparseable dates, future dates, dates before group creation | Error/Warning |
+| `AmountAnomalyDetector` | Negative values, zero amounts, unusually large amounts (>3σ) | Error/Warning |
+| `ParticipantDetector` | Unknown users, missing participants | Error |
+| `SettlementMisclassDetector` | Settlement keywords in expense rows | Warning |
+| `CurrencyDetector` | Unknown currency codes, mixed currencies without conversion | Warning |
+| `MembershipConflictDetector` | Expense date outside member's active period | Error |
+| `SplitConsistencyDetector` | Participant shares don't sum to total | Error |
+
+Each anomaly stored with: row number, severity, human-readable explanation, suggested action options.
+
+##### [NEW] backend/app/services/membership_engine.py
+
+1. Scan all CSV rows per user
+2. Find first/last appearance dates
+3. Suggest join_date = first_appearance - 1 day (rounded to month start if within 5 days)
+4. Suggest leave_date = last_appearance + reasonable buffer (rounded to month end)
+5. Return suggestions for user review (never auto-apply)
+
+##### [NEW] backend/app/services/balance_engine.py
+
+Ledger-based calculation:
+
+```
+For each member in group:
+  total_paid = SUM(expenses WHERE payer = member AND within_membership_period)
+  total_share = SUM(participant_shares WHERE user = member AND within_membership_period)
+  settlements_paid = SUM(settlements WHERE payer = member)
+  settlements_received = SUM(settlements WHERE payee = member)
+  
+  net_balance = total_paid - total_share + settlements_received - settlements_paid
+```
+
+**Explain endpoint** returns the full itemized breakdown:
+- Each expense where they paid (positive)
+- Each expense where they owe a share (negative)
+- Each settlement paid/received
+- Running total with final net
+
+##### [NEW] backend/app/services/settlement_engine.py
+
+Debt simplification algorithm:
+1. Calculate net balances for all members
+2. Separate into creditors (positive balance) and debtors (negative balance)
+3. Use greedy algorithm: match largest debtor with largest creditor
+4. Minimize number of transfers
+5. Return list of recommended transfers with explanations
+
+##### [NEW] backend/app/services/report_engine.py
+
+Aggregation queries for:
+- Monthly trends (group by month)
+- Category analysis (group by category)
+- Member contributions (per-member totals)
+- Settlement history timeline
+- Currency breakdown
+
+---
+
+### Phase 3 — Frontend Foundation
+
+##### [NEW] frontend/ (Vite + React + TypeScript)
+Initialize with `npx create-vite` with React TypeScript template.
+
+##### [NEW] Frontend dependencies
+- `tailwindcss` v4, `@shadcn/ui`, `framer-motion`
+- `react-hook-form`, `zod`, `@hookform/resolvers`
+- `@tanstack/react-query`, `axios`
+- `react-router-dom`, `lucide-react`
+- `recharts` (charts), `date-fns`, `clsx`
+
+##### [NEW] frontend/src/styles/
+- Global CSS with the specified color system
+- Tailwind config with custom colors, fonts (Inter, Geist)
+
+##### [NEW] frontend/src/components/ui/
+ShadCN components: Button, Card, Dialog, Dropdown, Input, Table, Badge, Tabs, Sheet, Tooltip, Toast, Progress, Skeleton, Avatar, Calendar, Command, Popover
+
+##### [NEW] frontend/src/components/layout/
+- `AppShell.tsx` — Main layout with sidebar + header
+- `Sidebar.tsx` — Navigation with group list
+- `Header.tsx` — User menu, notifications
+- `AuthLayout.tsx` — Split-screen auth layout
+
+---
+
+### Phase 4 — Frontend Pages & Features
+
+##### [NEW] frontend/src/pages/Landing.tsx
+Premium SaaS landing page with:
+- Hero section with headline, CTA buttons, dashboard mockup
+- Features grid (6 features with icons)
+- "How It Works" step-by-step
+- Benefits section
+- Final CTA
+- Footer with links
+
+##### [NEW] frontend/src/pages/auth/Login.tsx & Register.tsx & ForgotPassword.tsx
+Split-screen auth with form on right, branding on left. React Hook Form + Zod validation.
+
+##### [NEW] frontend/src/pages/Dashboard.tsx
+- Metric cards (Total Expenses, Groups, Members, Open Balances, Pending Imports)
+- Recent Activity feed
+- Group overview cards
+- Monthly spending chart (Recharts)
+- Import status tracker
+
+##### [NEW] frontend/src/pages/groups/GroupDetail.tsx
+- Group header with stats
+- Expense list with search/filter/sort/pagination
+- Members tab with timeline visualization
+- Balances tab with "Why?" explainer drawers
+- Settlements tab with recommendations
+
+##### [NEW] frontend/src/pages/import/ImportWizard.tsx
+Multi-step wizard with Framer Motion transitions:
+1. **Upload** — Drag & drop CSV
+2. **Column Mapping** — Auto-detected with manual override
+3. **Membership Review** — Timeline cards with suggestions
+4. **Anomaly Review** — Cards grouped by severity with action buttons
+5. **Confirmation** — Summary before import
+6. **Report** — Post-import results
+
+##### [NEW] frontend/src/components/import/AnomalyCard.tsx
+Cards showing:
+- Severity badge (Error/Warning/Info)
+- Row number reference
+- Human-readable explanation
+- Action buttons (Keep First, Keep Second, Keep Both, Skip, Manual Fix)
+- Resolution status indicator
+
+##### [NEW] frontend/src/components/balance/BalanceExplainer.tsx
+Slide-out drawer showing:
+- Net balance with direction (owes/is owed)
+- Itemized list of every expense and settlement
+- Running total visualization
+- Link to original CSV row if imported
+
+##### [NEW] frontend/src/components/settlement/SettlementFlow.tsx
+Visual flow diagram showing:
+- Optimized settlement recommendations
+- Flow cards: Payer → Amount → Payee
+- One-click "Mark as Settled" action
+
+---
+
+### Phase 5 — Reports & Polish
+
+##### [NEW] frontend/src/pages/reports/
+- Monthly Trends (line/bar charts)
+- Category Analysis (pie/donut charts)
+- Member Contributions (stacked bar)
+- Settlement History (timeline)
+- Currency Breakdown (grouped bar)
+
+##### [NEW] Animations & Micro-interactions
+- Page transitions with Framer Motion
+- Skeleton loaders on all data fetches
+- Hover effects on all interactive elements
+- Smooth drawer/modal animations
+- Toast notifications for all actions
+- Progress indicators for imports
+
+---
+
+## Build Order (Execution Phases)
+
+| Phase | Components | Priority |
+|-------|-----------|----------|
+| **1** | Backend foundation: models, DB, auth, config | Critical |
+| **2** | CSV Engine + Anomaly Engine + Membership Engine | Critical |
+| **3** | Balance Engine + Settlement Engine | Critical |
+| **4** | All API routes | Critical |
+| **5** | Frontend foundation: Vite, Tailwind, ShadCN, layout | Critical |
+| **6** | Landing page + Auth pages | High |
+| **7** | Import Wizard (full flow) | High |
+| **8** | Dashboard + Group pages | High |
+| **9** | Balance explainer + Settlement recommendations | High |
+| **10** | Reports + Polish | Medium |
+
+---
+
+## Verification Plan
+
+### Automated Tests
+```bash
+# Backend
+cd backend && python -m pytest tests/ -v
+
+# Frontend
+cd frontend && npm run build  # Type-check + build verification
+```
+
+### Manual Verification
+- Upload sample CSV with known anomalies → verify all 10 anomaly types detected
+- Create group with staggered membership → verify balance calculation respects timeline
+- Click "Why?" on any balance → verify full itemized breakdown
+- Complete full import flow → verify import report accuracy
+- Run settlement optimizer → verify minimum transfers
+
+### Sample CSV for Testing
+We will create a test CSV with intentional anomalies:
+- Duplicate rows, mixed date formats, negative amounts
+- Settlement entries mixed with expenses  
+- Users appearing/disappearing at different times
+- Multiple currencies, unknown participants
