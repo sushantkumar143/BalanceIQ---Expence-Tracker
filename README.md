@@ -152,6 +152,28 @@ The flagship feature of BalanceIQ is the multi-step CSV import. It prevents "gar
 *   Node.js (v18+)
 *   Python (3.11+)
 *   Git
+*   Docker & Docker Compose (Optional, for containerized setup)
+
+### 🐋 Run with Docker Compose (Recommended)
+The easiest way to run the entire stack locally is using Docker Compose.
+
+```bash
+# Build and start the containers in detached mode
+docker-compose up -d --build
+```
+- **Frontend** will be available at: `http://localhost`
+- **Backend API** will be available at: `http://localhost:8000`
+- **API Docs** will be available at: `http://localhost:8000/docs`
+
+To view logs or stop the services:
+```bash
+docker-compose logs -f
+docker-compose down
+```
+
+---
+
+### 💻 Manual Local Setup
 
 ### 1. Backend Setup
 Open a terminal and navigate to the backend directory:
