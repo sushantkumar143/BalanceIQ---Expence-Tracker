@@ -6,29 +6,29 @@
 
 @layer base {
   :root {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 243 75% 59%;
+    --background: 210 20% 98%; /* slate-50 */
+    --foreground: 222 47% 11%; /* slate-900 */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 53%; /* blue-600 */
     --primary-foreground: 210 40% 98%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%; /* slate-100 */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%; /* slate-500 */
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
     --success: 142 71% 45%;
     --success-foreground: 210 40% 98%;
     --warning: 38 92% 50%;
     --warning-foreground: 222 47% 8%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 243 75% 59%;
+    --border: 214 32% 91%; /* slate-200 */
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
     --radius: 0.75rem;
   }
 
@@ -49,15 +49,16 @@
   .glass-card {
     background: linear-gradient(
       135deg,
-      rgba(17, 24, 39, 0.8),
-      rgba(17, 24, 39, 0.6)
+      rgba(255, 255, 255, 0.95),
+      rgba(255, 255, 255, 0.8)
     );
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #818cf8, #6366f1, #4f46e5);
+    background: linear-gradient(135deg, #3b82f6, #2563eb, #1e3a8a);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -73,7 +74,7 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, #4f46e5, #6366f1, #818cf8);
+    background: linear-gradient(135deg, #3b82f6, #2563eb, #1d4ed8);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;

@@ -30,7 +30,7 @@ export default function AppShell() {
   ];
 
   return (
-    <div className="flex h-screen bg-[#0B1020] overflow-hidden">
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -42,18 +42,18 @@ export default function AppShell() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#0d1225] border-r border-white/5 flex flex-col transition-transform duration-300',
+          'fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-300',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center gap-3 px-5 border-b border-white/5">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+        <div className="h-16 flex items-center gap-3 px-5 border-b border-slate-200">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
             <Wallet className="w-4 h-4 text-white" />
           </div>
-          <span className="text-lg font-bold text-white tracking-tight">BalanceIQ</span>
+          <span className="text-lg font-bold text-slate-900 tracking-tight">BalanceIQ</span>
           <button
-            className="ml-auto lg:hidden text-gray-400 hover:text-white"
+            className="ml-auto lg:hidden text-slate-500 hover:text-slate-900"
             onClick={() => setSidebarOpen(false)}
           >
             <X className="w-5 h-5" />
@@ -71,8 +71,8 @@ export default function AppShell() {
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-indigo-600/10 text-indigo-400'
-                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
                 )}
               >
                 <item.icon className="w-4.5 h-4.5" />
@@ -84,10 +84,10 @@ export default function AppShell() {
           {/* Groups section */}
           <div className="pt-6">
             <div className="flex items-center justify-between px-3 mb-2">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Groups</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Groups</span>
               <Link
                 to="/app"
-                className="w-5 h-5 rounded bg-white/5 hover:bg-indigo-600/20 flex items-center justify-center text-gray-400 hover:text-indigo-400 transition-colors"
+                className="w-5 h-5 rounded hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"
               >
                 <Plus className="w-3 h-3" />
               </Link>
@@ -101,11 +101,11 @@ export default function AppShell() {
                   className={cn(
                     'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200',
                     isActive
-                      ? 'bg-indigo-600/10 text-indigo-400'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
                   )}
                 >
-                  <div className="w-7 h-7 rounded-md bg-gradient-to-br from-indigo-600/30 to-purple-600/30 flex items-center justify-center text-xs font-semibold text-indigo-300 flex-shrink-0">
+                  <div className="w-7 h-7 rounded-md bg-blue-100 flex items-center justify-center text-xs font-semibold text-blue-600 flex-shrink-0">
                     {getInitials(group.name)}
                   </div>
                   <span className="truncate">{group.name}</span>
@@ -120,18 +120,18 @@ export default function AppShell() {
         </nav>
 
         {/* User */}
-        <div className="p-3 border-t border-white/5">
+        <div className="p-3 border-t border-slate-200">
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-semibold text-white">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-semibold text-white">
               {user?.name ? getInitials(user.name) : '?'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+              <p className="text-sm font-medium text-slate-900 truncate">{user?.name}</p>
+              <p className="text-xs text-slate-500 truncate">{user?.email}</p>
             </div>
             <button
               onClick={handleLogout}
-              className="text-gray-500 hover:text-red-400 transition-colors"
+              className="text-slate-400 hover:text-red-500 transition-colors"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />
@@ -143,9 +143,9 @@ export default function AppShell() {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-16 border-b border-white/5 flex items-center gap-4 px-6 bg-[#0B1020]/80 backdrop-blur-xl">
+        <header className="h-16 border-b border-slate-200 flex items-center gap-4 px-6 bg-white/80 backdrop-blur-xl">
           <button
-            className="lg:hidden text-gray-400 hover:text-white"
+            className="lg:hidden text-slate-500 hover:text-slate-900"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="w-5 h-5" />
