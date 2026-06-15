@@ -6,6 +6,15 @@ BalanceIQ is a production-grade Shared Expense Management SaaS application. Unli
 
 ---
 
+## 📋 Assignment Documentation
+To view the full details required for the assignment, please see:
+*   **[SCOPE.md](SCOPE.md)**: Database Ledger Schema & CSV Anomaly log.
+*   **[DECISIONS.md](DECISIONS.md)**: Architectural and Design decisions log.
+*   **[IMPORT_REPORT.md](IMPORT_REPORT.md)**: Ingestion & Anomaly Resolution Report for `sample_expenses.csv`.
+*   **[AI_USAGE.md](AI_USAGE.md)**: AI Assistance log, prompts, error detection, and corrections.
+
+---
+
 ## 🌟 Key Features
 
 1. **Smart CSV Import Engine**: Upload raw, messy spreadsheets. The system automatically maps columns using fuzzy matching and handles structural inconsistencies.
