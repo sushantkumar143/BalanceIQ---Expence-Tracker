@@ -1,5 +1,7 @@
 # BalanceIQ 🚀
 
+![CI/CD](https://github.com/sushantkumar143/BalanceIQ---Expence-Tracker/actions/workflows/ci.yml/badge.svg)
+
 > **Transform messy expense spreadsheets into trustworthy, explainable balances.**
 
 BalanceIQ is a production-grade Shared Expense Management SaaS application. Unlike basic expense splitters, BalanceIQ features a powerful **CSV Import & Anomaly Resolution Engine** designed to handle messy real-world data (duplicate entries, ambiguous dates, mixed currencies, user overlaps) and computationally explain every single decision and balance derivation. 
@@ -12,6 +14,9 @@ To view the full details required for the assignment, please see:
 *   **[DECISIONS.md](DECISIONS.md)**: Architectural and Design decisions log.
 *   **[IMPORT_REPORT.md](IMPORT_REPORT.md)**: Ingestion & Anomaly Resolution Report for `sample_expenses.csv`.
 *   **[AI_USAGE.md](AI_USAGE.md)**: AI Assistance log, prompts, error detection, and corrections.
+
+*   **[backend/README.md](backend/README.md)**: Backend-specific setup and API details.
+*   **[frontend/README.md](frontend/README.md)**: Frontend-specific setup and component details.
 
 ---
 
