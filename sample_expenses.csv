@@ -1,0 +1,23 @@
+Date,Description,Amount,Paid By,Split With,Currency,Category
+01/02/2024,Rent Payment,25000,Aisha,"Aisha,Rohan,Priya,Meera",INR,Rent
+03/02/2024,Groceries,1500,Rohan,"Aisha,Rohan,Priya,Meera",INR,Groceries
+05/02/2024,Electricity Bill,2200,Priya,"Aisha,Rohan,Priya,Meera",INR,Utilities
+10/02/2024,Internet Bill,1800,Aisha,"Aisha,Rohan,Priya,Meera",INR,Utilities
+15/02/2024,Dinner at restaurant,3200,Rohan,"Aisha,Rohan,Priya,Meera",INR,Dining
+15/02/2024,Dinner at restaurant,3200,Rohan,"Aisha,Rohan,Priya,Meera",INR,Dining
+20/02/2024,Groceries,980,Meera,"Aisha,Rohan,Meera",INR,Groceries
+25-Feb-2024,Water bill,450,Priya,"Aisha,Rohan,Priya,Meera",INR,Utilities
+01/03/2024,Rent Payment,25000,Aisha,"Aisha,Rohan,Priya,Meera",INR,Rent
+05/03/2024,Rohan paid Aisha,5000,Rohan,Aisha,INR,Settlement
+10/03/2024,Gas Cylinder,1200,Meera,"Aisha,Rohan,Priya,Meera",INR,Utilities
+15/03/2024,Movie tickets,800,Rohan,"Rohan,Priya",INR,Entertainment
+20/03/2024,Groceries,-500,Priya,"Aisha,Rohan,Priya",INR,Groceries
+28/03/2024,House supplies,1650,Meera,"Aisha,Meera",INR,Household
+31/03/2024,Priya settled with Aisha,3000,Priya,Aisha,INR,Settlement
+15/04/2024,Groceries,2100,Dev,"Aisha,Rohan,Dev",INR,Groceries
+16/04/2024,Electricity Bill,2400,Aisha,"Aisha,Rohan,Dev,Sam",INR,Utilities
+20/04/2024,Team Dinner,4500,Sam,"Aisha,Rohan,Dev,Sam",INR,Dining
+25/04/2024,Internet Bill,1800,Rohan,"Aisha,Rohan,Dev,Sam",INR,Utilities
+30/04/2024,Groceries,0,Sam,"Aisha,Rohan",INR,Groceries
+05/05/2024,Rent Payment,$300,Aisha,"Aisha,Rohan,Dev,Sam",USD,Rent
+InvalidDate,Some expense,abc,Unknown,"Aisha,Rohan",INR,Other
