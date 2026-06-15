@@ -69,8 +69,8 @@ async def list_expenses(
     search: Optional[str] = None,
     category: Optional[str] = None,
     payer_id: Optional[str] = None,
-    sort_by: str = Query("date", regex="^(date|amount|description)$"),
-    sort_order: str = Query("desc", regex="^(asc|desc)$"),
+    sort_by: str = Query("date", pattern="^(date|amount|description)$"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

@@ -332,6 +332,7 @@ class AnomalyEngine:
                     if match:
                         payee = match.group(1).title()
 
+                payer_name = row.get("payer")
                 anomalies.append(
                     AnomalyResult(
                         row_number=row["row_number"],
@@ -341,7 +342,7 @@ class AnomalyEngine:
                             f"This row looks like a settlement (money transfer) "
                             f"rather than a shared expense: \"{desc}\". "
                             f"It will be recorded as a settlement"
-                            f"{f' from {row.get(\"payer\")} to {payee}' if payee else ''}."
+                            f"{f' from {payer_name} to {payee}' if payee else ''}."
                         ),
                         suggested_action={
                             "options": ["confirm_settlement", "treat_as_expense"],
